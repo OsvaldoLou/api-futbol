@@ -1,4 +1,4 @@
-package api_futbol.com.api_futbol.controllers;
+package api_futbol.com.api_futbol.Controller;
 
 import java.util.List;
 import java.util.Optional;
