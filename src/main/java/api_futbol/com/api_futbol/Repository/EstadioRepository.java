@@ -1,4 +1,4 @@
-package api_futbol.com.api_futbol.repositories;
+package api_futbol.com.api_futbol.Repository;
 
 import java.util.List;
 

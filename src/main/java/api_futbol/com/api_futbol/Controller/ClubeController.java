@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import api_futbol.com.api_futbol.Repository.ClubeRepository;
 import api_futbol.com.api_futbol.models.Clube;
-import api_futbol.com.api_futbol.repositories.ClubeRepository;
 
 @RestController
 @RequestMapping("/clube")
@@ -47,8 +47,9 @@ public class ClubeController {
         Clube createClube = new Clube();
         createClube.setNome(clube.getNome());
         createClube.setPais(clube.getPais());
-        createClube.setCidade(clube.getCidade());
+        createClube.setSiglaDoEstado(clube.getSiglaDoEstado());
         createClube.setEstado(clube.getEstado());
+        createClube.setDataDeCriacao(clube.getDataDeCriacao());
         clubeRepository.save(createClube);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createClube);
@@ -57,7 +58,7 @@ public class ClubeController {
     private boolean IsValid(Clube clube){
         return (clube.getNome() ==  null || clube.getNome().length() < 2 ||
         clube.getPais() ==  null || clube.getPais().length() < 2  ||
-        clube.getCidade() ==  null || clube.getCidade().length() < 2 
+        clube.getSiglaDoEstado() ==  null || clube.getSiglaDoEstado().length() < 2 
           );
     }
  
@@ -71,7 +72,7 @@ public class ClubeController {
         Clube updateClube = existingClube.get();
         updateClube.setNome(clube.getNome());
         updateClube.setPais(clube.getPais());
-        updateClube.setCidade(clube.getCidade());
+        updateClube.setSiglaDoEstado(clube.getSiglaDoEstado());
         updateClube.setEstado(clube.getEstado());
         clubeRepository.save(updateClube);
 
@@ -79,12 +80,12 @@ public class ClubeController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteClube(@PathVariable Long id) {
+    public ResponseEntity <?> deleteClube(@PathVariable Long id) {
         Optional<Clube> clube = clubeRepository.findById(id);
         if (!clube.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clube não existe");
         }
-        Clube estadoEliminar=clube.get();
+        Clube estadoEliminar = clube.get();
         estadoEliminar.setEstado(false);
         clubeRepository.save(estadoEliminar);
         return ResponseEntity.ok(clube.get());

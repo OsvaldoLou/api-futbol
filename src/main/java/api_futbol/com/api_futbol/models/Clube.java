@@ -1,6 +1,7 @@
 package api_futbol.com.api_futbol.models;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,10 @@ public class Clube implements Serializable {
     private String pais;
 
     @Column(nullable = false)
-    private String cidade;
+    private String siglaDoEstado;
+
+    @Column(nullable = false)
+    private LocalDateTime dataDeCriacao;
 
     
     private Boolean estado;

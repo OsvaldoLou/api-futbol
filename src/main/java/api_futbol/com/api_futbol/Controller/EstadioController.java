@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import api_futbol.com.api_futbol.Repository.EstadioRepository;
 import api_futbol.com.api_futbol.models.Estadio;
-import api_futbol.com.api_futbol.repositories.EstadioRepository;
 
 @RestController
 @RequestMapping("/estadio")

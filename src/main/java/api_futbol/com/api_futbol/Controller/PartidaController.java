@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import api_futbol.com.api_futbol.Repository.ClubeRepository;
+import api_futbol.com.api_futbol.Repository.EstadioRepository;
+import api_futbol.com.api_futbol.Repository.PartidaRepository;
 import api_futbol.com.api_futbol.models.Clube;
 import api_futbol.com.api_futbol.models.Estadio;
 import api_futbol.com.api_futbol.models.Partida;
-import api_futbol.com.api_futbol.repositories.ClubeRepository;
-import api_futbol.com.api_futbol.repositories.EstadioRepository;
-import api_futbol.com.api_futbol.repositories.PartidaRepository;
 
 @RestController
 @RequestMapping("/partida")
@@ -64,7 +64,6 @@ public class PartidaController {
         createPartida.setGolsMandante(partida.golsMandante);
         createPartida.setGolsVisitante(partida.golsVisitante);
         createPartida.setDataPartida(partida.dataPartida);
-
         partidaRepository.save(createPartida);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createPartida);
