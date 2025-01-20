@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import api_futbol.com.api_futbol.Repository.ClubeRepository;
 import api_futbol.com.api_futbol.models.Clube;
 
@@ -78,6 +79,8 @@ public class ClubeController {
 
         return ResponseEntity.ok(updateClube);
     }
+
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity <?> deleteClube(@PathVariable Long id) {
