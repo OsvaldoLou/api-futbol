@@ -63,6 +63,7 @@ public class ClubeController {
         clube.getPais() ==  null || clube.getPais().length() < 2  ||
         clube.getSiglaDoEstado() ==  null || clube.getSiglaDoEstado().length() < 2 
           );
+          
     }
  
     @PutMapping("/update")

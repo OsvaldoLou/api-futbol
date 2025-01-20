@@ -14,4 +14,19 @@ import api_futbol.com.api_futbol.models.Partida;
 public interface PartidaRepository extends JpaRepository<Partida, Long> {
     @Query("SELECT e FROM Partida e WHERE e.estado = true ORDER BY e.id")
     Page<Partida> findAllWithPagination(Pageable pageable);
+
+    @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante > p.golsVisitante")
+    Long countVictories();
+
+    @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante == p.golsVisitante")
+    Long countDraws();
+
+    @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante < p.golsVisitante")
+    Long countDefeats();
+
+    @Query("SELECT SUM(p.golsMandante) FROM Partida p")
+    Long sumGoalsScored();
+
+    @Query("SELECT SUM(p.golsVisitante) FROM Partida p")
+    Long sumGoalsConceded();
 }
