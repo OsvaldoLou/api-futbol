@@ -30,8 +30,8 @@ public class CustomizedResponseEntityExceptionHandler  extends ResponseEntityExc
                     }
         
             private ExceptionResponse ExceptionResponse(Date date, String message, String description) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'ExceptionResponse'");
+               
+                throw new UnsupportedOperationException(" ");
             }
 
             @ExceptionHandler(UnsupportedException.class)
