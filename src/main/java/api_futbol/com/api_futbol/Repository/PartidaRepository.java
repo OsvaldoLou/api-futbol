@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import api_futbol.com.api_futbol.models.Partida;
@@ -18,7 +19,7 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
     @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante > p.golsVisitante")
     Long countVictories();
 
-    @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante == p.golsVisitante")
+    @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante = p.golsVisitante")
     Long countDraws();
 
     @Query("SELECT COUNT(p) FROM Partida p WHERE p.golsMandante < p.golsVisitante")
@@ -29,4 +30,15 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
 
     @Query("SELECT SUM(p.golsVisitante) FROM Partida p")
     Long sumGoalsConceded();
+
+    @Query("SELECT p.clubeVisitante.nome AS adversario, " +
+       "SUM(CASE WHEN p.resultado = 'V' THEN 1 ELSE 0 END) AS victories, " +
+       "SUM(CASE WHEN p.resultado = 'E' THEN 1 ELSE 0 END) AS draws, " +
+       "SUM(CASE WHEN p.resultado = 'D' THEN 1 ELSE 0 END) AS defeats, " +
+       "SUM(p.golsClubeMandante) AS goalsScored, " +
+       "SUM(p.golsClubeVisitante) AS goalsConceded " +
+       "FROM Partida p " +
+       "WHERE p.clubeMandante.id = :clubeId " +
+       "GROUP BY p.clubeVisitante.nome")
+List<Object[]> findRetrospectoPorClube(@Param("clubeId") Long clubeId);
 }
