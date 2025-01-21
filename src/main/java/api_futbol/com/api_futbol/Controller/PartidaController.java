@@ -7,6 +7,7 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties.ShowSummary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -125,78 +126,87 @@ public class PartidaController {
         public Integer golsVisitante;
         
     }
-
     @GetMapping("/summary")
-    public ResponseEntity<?> getSummary() {
+     public ResponseEntity<Summary> getSummary() {
+    try {
+       
         Long victories = partidaRepository.countVictories();
         Long draws = partidaRepository.countDraws();
         Long defeats = partidaRepository.countDefeats();
         Long goalsScored = partidaRepository.sumGoalsScored();
         Long goalsConceded = partidaRepository.sumGoalsConceded();
 
+       
         Summary summary = new Summary(victories, draws, defeats, goalsScored, goalsConceded);
-    
-           return ResponseEntity.ok(summary);
+
+       
+        return ResponseEntity.ok(summary);
+    } catch (Exception e) {
         
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                             .body(null);
     }
-    public static class Summary {
-        public Long victories;
-        public Long draws;
-        public Long defeats;
-        public Long goalsScored;
-        public Long goalsConceded;
-
-        public Summary(Long victories, Long draws, Long defeats, long goalsScored, Long goalsConceded){
-            this.victories = victories;
-            this.draws = draws;
-            this.goalsScored = goalsScored;
-            this.goalsScored = goalsConceded;
-            
-        }
-    
-        
-    }
-    @GetMapping("/retrospecto/{clubeId}")
-public ResponseEntity<?> getRetrospecto(@PathVariable Long clubeId) {
-    List<Object[]> resultados = partidaRepository.findRetrospectoPorClube(clubeId);
-
-    if (resultados.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clube nao identificado!");
-    }
-
-    List<Retrospecto> retrospectos = new ArrayList<>();
-
-    for (Object[] resultado : resultados) {
-        Retrospecto retrospecto = new Retrospecto(
-            (String) resultado[0],
-            (Long) resultado[1], 
-            (Long) resultado[2],  
-            (Long) resultado[3],   
-            (Long) resultado[4],   
-            (Long) resultado[5]   
-        );
-        retrospectos.add(retrospecto);
-    }
-
-    return ResponseEntity.ok(retrospectos);
 }
-public static class Retrospecto {
-    public String adversario;
-    public Long victories;
-    public Long draws;
-    public Long defeats;
-    public Long goalsScored;
-    public Long goalsConceded;
+public class Summary {
+    private Long victories;
+    private Long draws;
+    private Long defeats;
+    private Long goalsScored;
+    private Long goalsConceded;
 
-    public Retrospecto(String adversario, Long victories, Long draws, Long defeats, Long goalsScored, Long goalsConceded) {
-        this.adversario = adversario;
+    
+    public Summary(Long victories, Long draws, Long defeats, Long goalsScored, Long goalsConceded) {
         this.victories = victories;
         this.draws = draws;
         this.defeats = defeats;
         this.goalsScored = goalsScored;
         this.goalsConceded = goalsConceded;
     }
+
+    public Long getVictories() {
+        return victories;
+    }
+
+    public void setVictories(Long victories) {
+        this.victories = victories;
+    }
+
+    public Long getDraws() {
+        return draws;
+    }
+
+    public void setDraws(Long draws) {
+        this.draws = draws;
+    }
+
+    public Long getDefeats() {
+        return defeats;
+    }
+
+    public void setDefeats(Long defeats) {
+        this.defeats = defeats;
+    }
+
+    public Long getGoalsScored() {
+        return goalsScored;
+    }
+
+    public void setGoalsScored(Long goalsScored) {
+        this.goalsScored = goalsScored;
+    }
+
+    public Long getGoalsConceded() {
+        return goalsConceded;
+    }
+
+    public void setGoalsConceded(Long goalsConceded) {
+        this.goalsConceded = goalsConceded;
+    }
 }
 
-
+   
+        
 }
+   
+
+

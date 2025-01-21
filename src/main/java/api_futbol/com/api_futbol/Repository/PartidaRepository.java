@@ -29,16 +29,6 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
     Long sumGoalsScored();
 
     @Query("SELECT SUM(p.golsVisitante) FROM Partida p")
-    Long sumGoalsConceded();
-
-    @Query("SELECT p.clubeVisitante.nome AS adversario, " +
-       "SUM(CASE WHEN p.resultado = 'V' THEN 1 ELSE 0 END) AS victories, " +
-       "SUM(CASE WHEN p.resultado = 'E' THEN 1 ELSE 0 END) AS draws, " +
-       "SUM(CASE WHEN p.resultado = 'D' THEN 1 ELSE 0 END) AS defeats, " +
-       "SUM(p.golsClubeMandante) AS goalsScored, " +
-       "SUM(p.golsClubeVisitante) AS goalsConceded " +
-       "FROM Partida p " +
-       "WHERE p.clubeMandante.id = :clubeId " +
-       "GROUP BY p.clubeVisitante.nome")
-List<Object[]> findRetrospectoPorClube(@Param("clubeId") Long clubeId);
+    Long sumGoalsConceded();    
+   
 }
