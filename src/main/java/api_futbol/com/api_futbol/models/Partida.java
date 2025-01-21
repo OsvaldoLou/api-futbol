@@ -49,7 +49,7 @@ public class Partida implements Serializable {
     private Integer golsVisitante;
 
     @Column(nullable = false)
-    private Integer resultados;
+    private Integer resultado;
 
     
     private Boolean estado;
