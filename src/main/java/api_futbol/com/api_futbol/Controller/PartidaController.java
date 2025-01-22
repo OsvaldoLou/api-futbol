@@ -7,7 +7,6 @@ import java.util.Optional;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties.ShowSummary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import api_futbol.com.api_futbol.Repository.ClubeRepository;
@@ -126,27 +126,29 @@ public class PartidaController {
         public Integer golsVisitante;
         
     }
-    @GetMapping("/summary")
-     public ResponseEntity<Summary> getSummary() {
-    try {
-       
-        Long victories = partidaRepository.countVictories();
-        Long draws = partidaRepository.countDraws();
-        Long defeats = partidaRepository.countDefeats();
-        Long goalsScored = partidaRepository.sumGoalsScored();
-        Long goalsConceded = partidaRepository.sumGoalsConceded();
+    @GetMapping("/summary/{idClube}")
+    public ResponseEntity<Summary> getSummaryByClub(@PathVariable Long idClube) {
+        try {
+            
+            if (!clubeRepository.existsById(idClube)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            Long victories = partidaRepository.countVictoriesByClub(idClube);
+            Long draws = partidaRepository.countDrawsByClub(idClube);
+            Long defeats = partidaRepository.countDefeatsByClub(idClube);
+            Long goalsScored = partidaRepository.sumGoalsScoredByClub(idClube);
+            Long goalsConceded = partidaRepository.sumGoalsConcededByClub(idClube);
 
-       
-        Summary summary = new Summary(victories, draws, defeats, goalsScored, goalsConceded);
-
-       
-        return ResponseEntity.ok(summary);
-    } catch (Exception e) {
+            Summary summary = new Summary(victories, draws, defeats, goalsScored, goalsConceded);
+    
         
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                             .body(null);
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(null);
+        }
     }
-}
 public class Summary {
     private Long victories;
     private Long draws;
@@ -204,8 +206,180 @@ public class Summary {
     }
 }
 
-   
+@GetMapping("/retrospecto/{clubeId}")
+public ResponseEntity<?> getRetrospecto(@PathVariable Long clubeId) {
+    List<Object[]> resultados = partidaRepository.findRetrospectoPorClube(clubeId);
+
+    if (resultados.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum retrospecto encontrado para o clube especificado.");
+    }
+
+    List<Retrospecto> retrospectos = new ArrayList<>();
+
+    for (Object[] resultado : resultados) {
+        Retrospecto retrospecto = new Retrospecto(
+            (String) resultado[0],  
+            (Long) resultado[1],   
+            (Long) resultado[2],   
+            (Long) resultado[3],   
+            (Long) resultado[4],   
+            (Long) resultado[5]    
+        );
+        retrospectos.add(retrospecto);
+    }
+
+    return ResponseEntity.ok(retrospectos);
+}
+public static class Retrospecto {
+    public String adversario;
+    public Long victories;
+    public Long draws;
+    public Long defeats;
+    public Long goalsScored;
+    public Long goalsConceded;
+
+    public Retrospecto(String adversario, Long victories, Long draws, Long defeats, Long goalsScored, Long goalsConceded) {
+        this.adversario = adversario;
+        this.victories = victories;
+        this.draws = draws;
+        this.defeats = defeats;
+        this.goalsScored = goalsScored;
+        this.goalsConceded = goalsConceded;
+    }
+}
+public PartidaRepository getPartidaRepository() {
+    return partidaRepository;
+}
+
+public void setPartidaRepository(PartidaRepository partidaRepository) {
+    this.partidaRepository = partidaRepository;
+}
+
+public ClubeRepository getClubeRepository() {
+    return clubeRepository;
+}
+
+public void setClubeRepository(ClubeRepository clubeRepository) {
+    this.clubeRepository = clubeRepository;
+}
+
+public EstadioRepository getEstadioRepository() {
+    return estadioRepository;
+}
+
+public void setEstadioRepository(EstadioRepository estadioRepository) {
+    this.estadioRepository = estadioRepository;
+}
+@GetMapping("/confrontos-diretos")
+public ResponseEntity<DirectConfrontationResponse> getDirectConfrontations(
+        @RequestParam Long idClube1, 
+        @RequestParam Long idClube2) {
+    try {
         
+        if (!clubeRepository.existsById(idClube1) || !clubeRepository.existsById(idClube2)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+       
+        List<Partida> partidas = partidaRepository.findMatchesBetweenClubs(idClube1, idClube2);
+
+        
+        DirectConfrontationRetrospect retrospect = partidaRepository.getDirectConfrontationRetrospect(idClube1, idClube2);
+
+        
+        DirectConfrontationResponse response = new DirectConfrontationResponse(partidas, retrospect);
+
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+public class DirectConfrontationResponse {
+    private List<Partida> partidas; 
+    private DirectConfrontationRetrospect retrospect; 
+
+    
+    public DirectConfrontationResponse(List<Partida> partidas, DirectConfrontationRetrospect retrospect) {
+        this.partidas = partidas;
+        this.retrospect = retrospect;
+    }
+
+    
+    public List<Partida> getPartidas() {
+        return partidas;
+    }
+
+    public void setPartidas(List<Partida> partidas) {
+        this.partidas = partidas;
+    }
+
+    public DirectConfrontationRetrospect getRetrospect() {
+        return retrospect;
+    }
+
+    public void setRetrospect(DirectConfrontationRetrospect retrospect) {
+        this.retrospect = retrospect;
+    }
+}
+public class DirectConfrontationRetrospect {
+    private Long victoriesClub1;
+    private Long victoriesClub2;
+    private Long draws;
+    private Long goalsClub1;
+    private Long goalsClub2;
+
+    
+    public DirectConfrontationRetrospect(Long victoriesClub1, Long victoriesClub2, Long draws, Long goalsClub1, Long goalsClub2) {
+        this.victoriesClub1 = victoriesClub1;
+        this.victoriesClub2 = victoriesClub2;
+        this.draws = draws;
+        this.goalsClub1 = goalsClub1;
+        this.goalsClub2 = goalsClub2;
+    }
+
+    
+    public Long getVictoriesClub1() {
+        return victoriesClub1;
+    }
+
+    public void setVictoriesClub1(Long victoriesClub1) {
+        this.victoriesClub1 = victoriesClub1;
+    }
+
+    public Long getVictoriesClub2() {
+        return victoriesClub2;
+    }
+
+    public void setVictoriesClub2(Long victoriesClub2) {
+        this.victoriesClub2 = victoriesClub2;
+    }
+
+    public Long getDraws() {
+        return draws;
+    }
+
+    public void setDraws(Long draws) {
+        this.draws = draws;
+    }
+
+    public Long getGoalsClub1() {
+        return goalsClub1;
+    }
+
+    public void setGoalsClub1(Long goalsClub1) {
+        this.goalsClub1 = goalsClub1;
+    }
+
+    public Long getGoalsClub2() {
+        return goalsClub2;
+    }
+
+    public void setGoalsClub2(Long goalsClub2) {
+        this.goalsClub2 = goalsClub2;
+    }
+}
+
+
 }
    
 
