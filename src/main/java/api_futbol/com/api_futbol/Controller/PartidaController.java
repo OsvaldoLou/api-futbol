@@ -1,6 +1,5 @@
 package api_futbol.com.api_futbol.Controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +22,7 @@ import api_futbol.com.api_futbol.Repository.PartidaRepository;
 import api_futbol.com.api_futbol.models.Clube;
 import api_futbol.com.api_futbol.models.Estadio;
 import api_futbol.com.api_futbol.models.Partida;
+import api_futbol.com.api_futbol.Dto.DtoInputModel;
 
 @RestController
 @RequestMapping("/partida")
@@ -44,11 +44,11 @@ public class PartidaController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPartida(@RequestBody PartidaInputModel partida) {
-        Optional<Clube> clubeMandanteOpt = clubeRepository.findById(partida.clubeMandanteId);
-        Optional<Clube> clubeVisitanteOpt = clubeRepository.findById(partida.clubeVisitanteId);
-        Optional<Estadio> estadioOpt = estadioRepository.findById(partida.estadioId);
-      
+    public ResponseEntity<?> createPartida(@RequestBody DtoInputModel partida) {
+        Optional<Clube> clubeMandanteOpt = clubeRepository.findById(partida.getClubeMandanteId());
+        Optional<Clube> clubeVisitanteOpt = clubeRepository.findById(partida.getClubeVisitante());
+        Optional<Estadio> estadioOpt = estadioRepository.findById(partida.getEstadioId());
+
         if (!clubeMandanteOpt.isPresent() || !clubeVisitanteOpt.isPresent() || !estadioOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Impossível criar partida: clube ou estádio não encontrado");
@@ -62,25 +62,24 @@ public class PartidaController {
         createPartida.setClubeMandante(clubeMandante);
         createPartida.setClubeVisitante(clubeVisitante);
         createPartida.setEstadio(estadio);
-        createPartida.setDataPartida(partida.dataPartida);
-        createPartida.setGolsMandante(partida.golsMandante);
-        createPartida.setGolsVisitante(partida.golsVisitante);
+        createPartida.setDataPartida(partida.getDataPartida());
+        createPartida.setGolsMandante(partida.getGolsMandante());
+        createPartida.setGolsVisitante(partida.getGolsVisitante());
         partidaRepository.save(createPartida);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createPartida);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updatePartida(@RequestBody PartidaInputModel partida, @PathVariable Long id) {
+    public ResponseEntity<?> updatePartida(@RequestBody DtoInputModel partida, @PathVariable Long id) {
         Optional<Partida> existingPartidaOpt = partidaRepository.findById(id);
         if (!existingPartidaOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Partida inexistente");
         }
 
-        Optional<Clube> clubeMandanteOpt = clubeRepository.findById(partida.clubeMandanteId);
-        Optional<Clube> clubeVisitanteOpt = clubeRepository.findById(partida.clubeVisitanteId);
-        Optional<Estadio> estadioOpt = estadioRepository.findById(partida.estadioId);
-        
+        Optional<Clube> clubeMandanteOpt = clubeRepository.findById(partida.getClubeMandanteId());
+        Optional<Clube> clubeVisitanteOpt = clubeRepository.findById(partida.getClubeVisitante());
+        Optional<Estadio> estadioOpt = estadioRepository.findById(partida.getEstadioId());
 
         if (!clubeMandanteOpt.isPresent() || !clubeVisitanteOpt.isPresent() || !estadioOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -95,9 +94,9 @@ public class PartidaController {
         updatePartida.setClubeMandante(clubeMandante);
         updatePartida.setClubeVisitante(clubeVisitante);
         updatePartida.setEstadio(estadio);
-        updatePartida.setGolsMandante(partida.golsMandante);
-        updatePartida.setGolsVisitante(partida.golsVisitante);
-        updatePartida.setDataPartida(partida.dataPartida);
+        updatePartida.setGolsMandante(partida.getGolsMandante());
+        updatePartida.setGolsVisitante(partida.getGolsVisitante());
+        updatePartida.setDataPartida(partida.getDataPartida());
 
         partidaRepository.save(updatePartida);
 
@@ -116,7 +115,7 @@ public class PartidaController {
         return ResponseEntity.ok(partida);
     }
 
-    public static class PartidaInputModel {
+    /*public static class PartidaInputModel {
         public Long clubeMandanteId;
         public Long clubeVisitanteId;
         public Long estadioId;
@@ -124,7 +123,7 @@ public class PartidaController {
         public Integer golsMandante;
         public Integer golsVisitante;
 
-    }
+    }*/
 
     @GetMapping("/retospetoGeral/{idClube}")
     public ResponseEntity<Summary> getSummaryByClub(@PathVariable Long idClube) {
@@ -191,7 +190,8 @@ public class PartidaController {
     public void setEstadioRepository(EstadioRepository estadioRepository) {
         this.estadioRepository = estadioRepository;
     }
-   @GetMapping("/retrospectoAdversario/{clubeId}")
+
+    @GetMapping("/retrospectoAdversario/{clubeId}")
     public ResponseEntity<?> getRetrospecto(@PathVariable Long clubeId) {
         Optional<Clube> clubeOpt = clubeRepository.findById(clubeId);
         if (!clubeOpt.isPresent()) {
@@ -256,49 +256,49 @@ public class PartidaController {
         List<Partida> partidas = partidaRepository.findByClubes(clube1Id, clube2Id);
         if (partidas.isEmpty()) {
             RetrospectoConfronto retrospecto = new RetrospectoConfronto(
-                clube1Opt.get(), 
-                clube2Opt.get(), 
-                0L, 
-                0L, 
-                0L, 
-                0L, 
-                0L, 
-                0L, 
-                0L  
-            );
-            
+                    clube1Opt.get(),
+                    clube2Opt.get(),
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L);
+
             return ResponseEntity.ok().body(new Confronto(partidas, retrospecto));
         }
 
-        long victoriesClube1 = partidas.stream().filter(p -> 
-            (p.getClubeMandante().getId()==clube1Id && p.getGolsMandante() > p.getGolsVisitante()) ||
-            (p.getClubeVisitante().getId()==clube1Id && p.getGolsVisitante() > p.getGolsMandante())
-        ).count();
+        long victoriesClube1 = partidas.stream()
+                .filter(p -> (p.getClubeMandante().getId() == clube1Id && p.getGolsMandante() > p.getGolsVisitante()) ||
+                        (p.getClubeVisitante().getId() == clube1Id && p.getGolsVisitante() > p.getGolsMandante()))
+                .count();
 
-        long victoriesClube2 = partidas.stream().filter(p -> 
-            (p.getClubeMandante().getId()==clube2Id && p.getGolsMandante() > p.getGolsVisitante()) ||
-            (p.getClubeVisitante().getId()==clube2Id && p.getGolsVisitante() > p.getGolsMandante())
-        ).count();
+        long victoriesClube2 = partidas.stream()
+                .filter(p -> (p.getClubeMandante().getId() == clube2Id && p.getGolsMandante() > p.getGolsVisitante()) ||
+                        (p.getClubeVisitante().getId() == clube2Id && p.getGolsVisitante() > p.getGolsMandante()))
+                .count();
 
         long draws = partidas.stream().filter(p -> p.getGolsMandante().equals(p.getGolsVisitante())).count();
 
-        long goalsScoredClube1 = partidas.stream().mapToLong(p -> 
-            p.getClubeMandante().getId()==clube1Id ? p.getGolsMandante() : p.getGolsVisitante()
-        ).sum();
+        long goalsScoredClube1 = partidas.stream()
+                .mapToLong(p -> p.getClubeMandante().getId() == clube1Id ? p.getGolsMandante() : p.getGolsVisitante())
+                .sum();
 
-        long goalsConcededClube1 = partidas.stream().mapToLong(p -> 
-            p.getClubeMandante().getId()==clube1Id ? p.getGolsVisitante() : p.getGolsMandante()
-        ).sum();
+        long goalsConcededClube1 = partidas.stream()
+                .mapToLong(p -> p.getClubeMandante().getId() == clube1Id ? p.getGolsVisitante() : p.getGolsMandante())
+                .sum();
 
-        long goalsScoredClube2 = partidas.stream().mapToLong(p -> 
-            p.getClubeMandante().getId()==clube2Id ? p.getGolsMandante() : p.getGolsVisitante()
-        ).sum();
+        long goalsScoredClube2 = partidas.stream()
+                .mapToLong(p -> p.getClubeMandante().getId() == clube2Id ? p.getGolsMandante() : p.getGolsVisitante())
+                .sum();
 
-        long goalsConcededClube2 = partidas.stream().mapToLong(p -> 
-            p.getClubeMandante().getId()==clube2Id ? p.getGolsVisitante() : p.getGolsMandante()
-        ).sum();
+        long goalsConcededClube2 = partidas.stream()
+                .mapToLong(p -> p.getClubeMandante().getId() == clube2Id ? p.getGolsVisitante() : p.getGolsMandante())
+                .sum();
 
-        RetrospectoConfronto retrospecto = new RetrospectoConfronto(clube1Opt.get(), clube2Opt.get(), victoriesClube1, draws, victoriesClube2, goalsScoredClube1, goalsConcededClube1, goalsScoredClube2, goalsConcededClube2);
+        RetrospectoConfronto retrospecto = new RetrospectoConfronto(clube1Opt.get(), clube2Opt.get(), victoriesClube1,
+                draws, victoriesClube2, goalsScoredClube1, goalsConcededClube1, goalsScoredClube2, goalsConcededClube2);
         return ResponseEntity.ok().body(new Confronto(partidas, retrospecto));
     }
 
@@ -311,6 +311,7 @@ public class PartidaController {
             this.retrospecto = retrospecto;
         }
     }
+
     public static class RetrospectoConfronto {
         public Clube clube1;
         public Clube clube2;
@@ -322,7 +323,8 @@ public class PartidaController {
         public Long goalsScoredClube2;
         public Long goalsConcededClube2;
 
-        public RetrospectoConfronto(Clube clube1, Clube clube2, Long victoriesClube1, Long draws, Long victoriesClube2, Long goalsScoredClube1, Long goalsConcededClube1, Long goalsScoredClube2, Long goalsConcededClube2) {
+        public RetrospectoConfronto(Clube clube1, Clube clube2, Long victoriesClube1, Long draws, Long victoriesClube2,
+                Long goalsScoredClube1, Long goalsConcededClube1, Long goalsScoredClube2, Long goalsConcededClube2) {
             this.clube1 = clube1;
             this.clube2 = clube2;
             this.victoriesClube1 = victoriesClube1;
