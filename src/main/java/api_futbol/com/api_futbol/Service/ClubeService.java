@@ -56,18 +56,6 @@ public class ClubeService {
 
     }
 
-    @Autowired
-    public ClubeService(ClubeRepository clubeRepository) {
-        this.clubeRepository = clubeRepository;
-    }
-
-    public Optional<Clube> findById(Long id) {
-        return clubeRepository.findById(id);
-    }
-
-    public void deactivateClube(Clube clube) {
-        clube.setEstado(false);
-        clubeRepository.save(clube);
-    }
+   
 
 }

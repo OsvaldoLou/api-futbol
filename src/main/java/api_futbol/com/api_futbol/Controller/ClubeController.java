@@ -1,6 +1,5 @@
 package api_futbol.com.api_futbol.Controller;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import api_futbol.com.api_futbol.Repository.ClubeRepository;
 import api_futbol.com.api_futbol.Service.ClubeService;
@@ -44,35 +42,30 @@ public class ClubeController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createNewClube(@RequestBody Clube clube) {   
-       Clube createClube =  clubeService.salvarClube(clube);
+    public ResponseEntity<?> createNewClube(@RequestBody Clube clube) {
+        Clube createClube = clubeService.salvarClube(clube);
         return ResponseEntity.status(HttpStatus.CREATED).body(createClube);
     }
 
- 
     @PutMapping("/update")
     public ResponseEntity<?> updateClube(@RequestBody Clube clube) {
-        
+
         Optional<Clube> clubOptional = clubeRepository.findById(clube.getId());
-        Clube  updateClube = clubeService.editarClube(clube);
+        Clube updateClube = clubeService.editarClube(clube);
 
         return ResponseEntity.ok(updateClube);
     }
 
-
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteClube(@PathVariable Long id) {
-        Optional<Clube> clube = clubeService.findById(id);
-        
+        Optional<Clube> clube = clubeRepository.findById(id);
         if (!clube.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clube não existe");
         }
-
         Clube estadoEliminar = clube.get();
-        clubeService.deactivateClube(estadoEliminar);
-
-        return ResponseEntity.ok(estadoEliminar);
+        estadoEliminar.setEstado(false);
+        clubeRepository.save(estadoEliminar);
+        return ResponseEntity.ok(clube.get());
     }
 
 }

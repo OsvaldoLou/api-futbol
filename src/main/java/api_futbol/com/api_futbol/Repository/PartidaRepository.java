@@ -1,5 +1,6 @@
 package api_futbol.com.api_futbol.Repository;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import api_futbol.com.api_futbol.models.Partida;
-
 
 @Repository
 public interface PartidaRepository extends JpaRepository<Partida, Long> {
@@ -33,28 +33,10 @@ public interface PartidaRepository extends JpaRepository<Partida, Long> {
                         "FROM Partida p WHERE p.clubeMandante.id = :idClube OR p.clubeVisitante.id = :idClube")
         Long sumGoalsScoredByClub(@Param("idClube") Long idClube);
 
-        /*@Query("SELECT DISTINCT p.clubeVisitante.id FROM Partida p WHERE p.clube.id = :idClube")
-        List<Long> findAdversariosByClubId(@Param("idClube") Long idClube);
+        @Query("SELECT p FROM Partida p WHERE p.clubeMandante.id = :clubeId OR p.clubeVisitante.id = :clubeId")
+        List<Partida> findByClubeId(Long clubeId);
 
-       
-        @Query("SELECT COUNT(p) FROM Partida p WHERE p.clube.id = :idClube AND p.clubeVisitante.id = :idAdversario AND p.resultado = 'VITÓRIA'")
-        Long countVictoriesAgainstAdversary(@Param("idClube") Long idClube, @Param("idAdversario") Long idAdversario);
+        @Query("SELECT p FROM Partida p WHERE (p.clubeMandante.id = :clube1Id AND p.clubeVisitante.id = :clube2Id) OR (p.clubeMandante.id = :clube2Id AND p.clubeVisitante.id = :clube1Id)")
+        List<Partida> findByClubes(Long clube1Id, Long clube2Id);
 
-        
-        @Query("SELECT COUNT(p) FROM Partida p WHERE p.clube.id = :idClube AND p.clubeVisitante.id = :idAdversario AND p.resultado = 'EMPATE'")
-        Long countDrawsAgainstAdversary(@Param("idClube") Long idClube, @Param("idAdversario") Long idAdversario);
-
-        
-        @Query("SELECT COUNT(p) FROM Partida p WHERE p.clube.id = :idClube AND p.clubeVisitante.id = :idAdversario AND p.resultado = 'DERROTA'")
-        Long countDefeatsAgainstAdversary(@Param("idClube") Long idClube, @Param("idAdversario") Long idAdversario);
-
-        
-        @Query("SELECT SUM(p.golsMarcados) FROM Partida p WHERE p.clube.id = :idClube AND p.clubeVisitante.id = :idAdversario")
-        Long sumGoalsScoredAgainstAdversary(@Param("idClube") Long idClube, @Param("idAdversario") Long idAdversario);
-
-       
-        @Query("SELECT SUM(p.golsSofridos) FROM Partida p WHERE p.clube.id = :idClube AND p.clubeVisitante.id = :idAdversario")
-        Long sumGoalsConcededAgainstAdversary(@Param("idClube") Long idClube, @Param("idAdversario") Long idAdversario);*/
-        
-        
 }
