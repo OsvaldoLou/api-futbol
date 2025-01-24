@@ -13,5 +13,9 @@ import api_futbol.com.api_futbol.models.Clube;
 public interface ClubeRepository extends JpaRepository<Clube, Long> {
     @Query("SELECT e FROM Clube e where e.estado=true ORDER BY e.id LIMIT :size OFFSET :start")
     List<Clube> findAllWithPagination(@Param("start") int start, @Param("size") int size);
+    
+
+    @Query("SELECT c FROM Clube c WHERE c.id IN :ids")
+    List<Clube> findAllByIds(@Param("ids") List<Long> ids);
 
 }

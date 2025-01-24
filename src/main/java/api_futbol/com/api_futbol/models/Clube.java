@@ -30,12 +30,14 @@ public class Clube implements Serializable {
     private String pais;
 
     @Column(nullable = false)
+    private String cidade;
+
+    @Column(nullable = false)
     private String siglaDoEstado;
 
     @Column(nullable = false)
     private LocalDateTime dataDeCriacao;
 
-    
     private Boolean estado;
     public Clube() {
     }

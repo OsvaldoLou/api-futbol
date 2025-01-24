@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import api_futbol.com.api_futbol.Repository.ClubeRepository;
+import api_futbol.com.api_futbol.Service.ClubeService;
 import api_futbol.com.api_futbol.models.Clube;
 
 @RestController
@@ -26,6 +27,8 @@ import api_futbol.com.api_futbol.models.Clube;
 public class ClubeController {
     @Autowired
     ClubeRepository clubeRepository;
+    @Autowired
+    ClubeService clubeService;
 
     @GetMapping("/all")
     public List<Clube> getAllClubes(
@@ -41,43 +44,17 @@ public class ClubeController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createNewClube(@RequestBody Clube clube) {
-
-        if (IsValid(clube)) 
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verifique os seus campos!"); 
-         
-        Clube createClube = new Clube();
-        createClube.setNome(clube.getNome());
-        createClube.setPais(clube.getPais());
-        createClube.setSiglaDoEstado(clube.getSiglaDoEstado());
-        createClube.setEstado(clube.getEstado());
-        createClube.setDataDeCriacao(clube.getDataDeCriacao());
-        clubeRepository.save(createClube);
-
+    public ResponseEntity<?> createNewClube(@RequestBody Clube clube) {   
+       Clube createClube =  clubeService.salvarClube(clube);
         return ResponseEntity.status(HttpStatus.CREATED).body(createClube);
     }
 
-    private boolean IsValid(Clube clube){
-        return (clube.getNome() ==  null || clube.getNome().length() < 2 ||
-        clube.getPais() ==  null || clube.getPais().length() < 2  ||
-        clube.getSiglaDoEstado() ==  null || clube.getSiglaDoEstado().length() < 2 
-          );
-          
-    }
  
     @PutMapping("/update")
     public ResponseEntity<?> updateClube(@RequestBody Clube clube) {
-        Optional<Clube> existingClube = clubeRepository.findById(clube.getId());
-        if (!existingClube.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clube não existe");
-        }
-
-        Clube updateClube = existingClube.get();
-        updateClube.setNome(clube.getNome());
-        updateClube.setPais(clube.getPais());
-        updateClube.setSiglaDoEstado(clube.getSiglaDoEstado());
-        updateClube.setEstado(clube.getEstado());
-        clubeRepository.save(updateClube);
+        
+        Optional<Clube> clubOptional = clubeRepository.findById(clube.getId());
+        Clube  updateClube = clubeService.editarClube(clube);
 
         return ResponseEntity.ok(updateClube);
     }
@@ -85,14 +62,17 @@ public class ClubeController {
 
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity <?> deleteClube(@PathVariable Long id) {
-        Optional<Clube> clube = clubeRepository.findById(id);
+    public ResponseEntity<?> deleteClube(@PathVariable Long id) {
+        Optional<Clube> clube = clubeService.findById(id);
+        
         if (!clube.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Clube não existe");
         }
+
         Clube estadoEliminar = clube.get();
-        estadoEliminar.setEstado(false);
-        clubeRepository.save(estadoEliminar);
-        return ResponseEntity.ok(clube.get());
+        clubeService.deactivateClube(estadoEliminar);
+
+        return ResponseEntity.ok(estadoEliminar);
     }
+
 }

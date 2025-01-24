@@ -2,6 +2,8 @@ package api_futbol.com.api_futbol.models;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -40,18 +42,16 @@ public class Partida implements Serializable {
     private Estadio estadio;
 
     @Column(nullable = false)
-    private LocalDateTime dataPartida;
+    @JsonFormat(pattern = "yyyy-MM-dd'HH:mm:ss")
+    public LocalDateTime dataPartida;
+   
 
     @Column(nullable = false)
     private Integer golsMandante;
 
     @Column(nullable = false)
     private Integer golsVisitante;
-
-    @Column(nullable = false)
-    private Integer resultado;
-
-    
+   
     private Boolean estado;
 
     public Partida() {
